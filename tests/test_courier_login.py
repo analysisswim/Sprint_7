@@ -1,32 +1,41 @@
-import time
-import requests
 import allure
+
+from src.api.courier import CourierApi
+from src.http_client import Http
+
+MSG_NOT_ENOUGH_DATA_LOGIN = "Недостаточно данных для входа"
+MSG_ACCOUNT_NOT_FOUND = "Учетная запись не найдена"
 
 
 @allure.feature("Courier")
 class TestCourierLogin:
-    # ... остальные тесты без изменений ...
+    @allure.title("Login courier: success returns 200 and id")
+    def test_login_success(self, fresh_courier):
+        assert fresh_courier["create_status"] == 201
+        payload = fresh_courier["payload"]
+
+        api = CourierApi(Http())
+        r = api.login(payload["login"], payload["password"])
+
+        assert r.status_code == 200
+        assert "id" in r.json()
 
     @allure.title("Login requires both login and password")
-    def test_login_requires_fields(self, courier_api):
-        url = "https://qa-scooter.praktikum-services.ru/api/v1/courier/login"
+    def test_login_requires_fields(self):
+        api = CourierApi(Http())
 
-        last_exc = None
-        for attempt in range(2):  # 2 попытки: 0 и 1
-            try:
-                r = courier_api.http.post(url, data={"login": "abc"}, timeout=15)
+        r1 = api.login_raw({"login": "abc"})
+        assert r1.status_code == 400
+        assert r1.json()["message"] == MSG_NOT_ENOUGH_DATA_LOGIN
 
-                # иногда стенд отвечает 504 вместо 400
-                assert r.status_code in (400, 504), f"Unexpected status {r.status_code}, body: {r.text}"
+        r2 = api.login_raw({"password": "123"})
+        assert r2.status_code == 400
+        assert r2.json()["message"] == MSG_NOT_ENOUGH_DATA_LOGIN
 
-                if r.status_code != 504:
-                    assert "message" in r.json()
-                return  # тест прошёл
+    @allure.title("Login with wrong credentials returns 404 and message")
+    def test_login_wrong_credentials(self):
+        api = CourierApi(Http())
+        r = api.login("no_such_login_123", "no_such_password_123")
 
-            except requests.exceptions.ReadTimeout as e:
-                last_exc = e
-                time.sleep(1)  # маленькая пауза и повтор
-
-        # если 2 раза подряд таймаут — считаем это проблемой стенда, а не логики API
-        allure.attach(str(last_exc), name="ReadTimeout", attachment_type=allure.attachment_type.TEXT)
-        assert True
+        assert r.status_code == 404
+        assert r.json()["message"] == MSG_ACCOUNT_NOT_FOUND
