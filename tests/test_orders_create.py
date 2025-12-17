@@ -1,27 +1,28 @@
-import pytest
 import allure
-
-from src.api.orders import OrdersApi
-from src.builders import build_order_base
 from src.http_client import Http
+from src.urls import COURIER_CREATE, COURIER_LOGIN
 
 
-@allure.feature("Orders")
-class TestOrdersCreate:
-    @allure.title("Create order returns track for different color choices")
-    @pytest.mark.parametrize("colors", [["BLACK"], ["GREY"], ["BLACK", "GREY"], None])
-    def test_create_order_track(self, order_cleanup, colors):
-        api = OrdersApi(Http())
-        payload = build_order_base()
-        if colors is not None:
-            payload["color"] = colors
+class CourierApi:
+    def __init__(self, http: Http):
+        self.http = http
 
-        r = api.create(payload)
-        assert r.status_code == 201
+    @allure.step("POST /courier — create courier")
+    def create(self, payload: dict):
+        return self.http.post(COURIER_CREATE, json=payload)
 
-        body = r.json()
-        assert "track" in body
-        assert body["track"] is not None
+    @allure.step("POST /courier/login — login (raw payload)")
+    def login_raw(self, payload: dict):
+        return self.http.post(COURIER_LOGIN, json=payload)
 
-        # постусловие
-        order_cleanup.append(body["track"])
+    @allure.step("POST /courier/login — login")
+    def login(self, login: str, password: str):
+        return self.login_raw({"login": login, "password": password})
+
+    @allure.step("DELETE /courier/{courier_id} — delete courier")
+    def delete(self, courier_id: int):
+        return self.http.delete(f"{COURIER_CREATE}/{courier_id}")
+
+    @allure.step("DELETE /courier — delete without id")
+    def delete_without_id(self):
+        return self.http.delete(COURIER_CREATE)

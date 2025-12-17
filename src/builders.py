@@ -1,28 +1,32 @@
 import random
 import string
-from datetime import date, timedelta
 
-def _rand_letters(n: int = 10) -> str:
-    alphabet = string.ascii_lowercase
-    return "".join(random.choice(alphabet) for _ in range(n))
+
+def _rand_str(n=10):
+    letters = string.ascii_lowercase
+    return "".join(random.choice(letters) for _ in range(n))
+
 
 def build_courier():
-    """Генерирует уникального курьера."""
     return {
-        "login": _rand_letters(12),
-        "password": _rand_letters(12),
-        "firstName": _rand_letters(8),
+        "login": _rand_str(12),
+        "password": _rand_str(12),
+        "firstName": _rand_str(8),
     }
 
-def build_order_base():
-    """База заказа (без color). Дату даём на завтра, чтобы было стабильно."""
-    return {
-        "firstName": "Alex",
-        "lastName": "Tester",
-        "address": "Moscow, QA street, 7",
+
+def build_order_base(colors=None):
+    payload = {
+        "firstName": "Naruto",
+        "lastName": "Uchiha",
+        "address": "Konoha, 142 apt.",
         "metroStation": 4,
-        "phone": "+79991112233",
-        "rentTime": 3,
-        "deliveryDate": (date.today() + timedelta(days=1)).isoformat(),
-        "comment": "api autotest sprint7",
+        "phone": "+7 800 355 35 35",
+        "rentTime": 5,
+        "deliveryDate": "2025-12-31",
+        "comment": "Saske, come back to Konoha",
     }
+    # API ожидает поле "color" (список строк). Если None — не передаём вовсе.
+    if colors is not None:
+        payload["color"] = colors
+    return payload

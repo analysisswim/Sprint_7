@@ -1,15 +1,9 @@
 BASE_URL = "https://qa-scooter.praktikum-services.ru"
-API_V1 = f"{BASE_URL}/api/v1"
+MSG_NOT_ENOUGH_DATA_CREATE = "Недостаточно данных для создания учетной записи"
+MSG_NOT_ENOUGH_DATA_LOGIN = "Недостаточно данных для входа"
 
-# courier
-COURIER_CREATE = f"{API_V1}/courier"
-COURIER_LOGIN  = f"{API_V1}/courier/login"
-
-# orders
-ORDERS_CREATE = f"{API_V1}/orders"
-ORDERS_LIST   = f"{API_V1}/orders"
-
-# extra
-ORDERS_CANCEL = f"{API_V1}/orders/cancel"   # PUT + params track=...
-ORDERS_TRACK  = f"{API_V1}/orders/track"    # GET + params t=...
-ORDERS_ACCEPT = f"{API_V1}/orders/accept"   # PUT /orders/accept/{orderId} + params courierId=...
+# Messages (match real API responses)
+MSG_LOGIN_ALREADY_USED = "Этот логин уже используется. Попробуйте другой."
+MSG_NOT_ENOUGH_DATA = "Недостаточно данных для создания учетной записи"
+MSG_ACCOUNT_NOT_FOUND = "Учетная запись не найдена"
+MSG_ORDER_ID_NOT_EXISTS = "Заказа с таким id не существует"
